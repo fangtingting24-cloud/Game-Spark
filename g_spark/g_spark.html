@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>G-Spark · 游戏竞品设计每日小报</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Archivo+Black&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          spark: {
+            sky: '#33A1FF',
+            skyDeep: '#1E7FD1',
+            yellow: '#FFEA00',
+            magenta: '#FF00FF',
+            ink: '#000000',
+            cream: '#FFF8E7',
+            mint: '#B8F2E6',
+            peach: '#FFB5A7',
+            lavender: '#C8B6FF',
+          }
+        },
+        fontFamily: {
+          display: ['"Archivo Black"', '"Noto Sans SC"', 'sans-serif'],
+          body: ['"Noto Sans SC"', 'system-ui', 'sans-serif'],
+        },
+        boxShadow: {
+          sticker: '6px 6px 0 0 #000',
+          'sticker-sm': '4px 4px 0 0 #000',
+          'sticker-lg': '10px 10px 0 0 #000',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --ink: #000;
+    --sky: #33A1FF;
+    --yellow: #FFEA00;
+    --magenta: #FF00FF;
+  }
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans SC', system-ui, sans-serif;
+    background: var(--sky);
+    overflow-x: hidden;
+  }
+
+  /* ---- Sticker effect ---- */
+  .sticker {
+    border: 3px solid var(--ink);
+    box-shadow: 6px 6px 0 0 var(--ink);
+    border-radius: 28px 22px 30px 20px / 22px 30px 20px 28px;
+    background: #fff;
+  }
+  .sticker-alt {
+    border: 3px solid var(--ink);
+    box-shadow: 6px 6px 0 0 var(--ink);
+    border-radius: 22px 30px 20px 28px / 30px 20px 28px 22px;
+  }
+  .sticker-btn {
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 0 var(--ink);
+    border-radius: 999px 999px 999px 999px / 80% 80% 120% 120%;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .sticker-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--ink);
+  }
+  .sticker-tag {
+    border: 2.5px solid var(--ink);
+    box-shadow: 3px 3px 0 0 var(--ink);
+    border-radius: 18px 12px 20px 10px / 12px 20px 10px 18px;
+  }
+
+  /* ---- Text outline ---- */
+  .text-outline {
+    -webkit-text-stroke: 3px var(--ink);
+    text-stroke: 3px var(--ink);
+    paint-order: stroke fill;
+  }
+  .text-outline-sm {
+    -webkit-text-stroke: 2px var(--ink);
+    text-stroke: 2px var(--ink);
+    paint-order: stroke fill;
+  }
+
+  /* ---- Background lightning ---- */
+  .lightning-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bolt {
+    position: absolute;
+    opacity: .55;
+    animation: flicker 3.2s infinite;
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: .18; }
+    12% { opacity: .7; }
+    18% { opacity: .2; }
+    55% { opacity: .5; }
+    62% { opacity: .15; }
+  }
+
+  /* ---- Spark button pulse ---- */
+  .spark-pulse {
+    animation: sparkPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes sparkPulse {
+    0%, 100% { box-shadow: 4px 4px 0 0 var(--ink), 0 0 0 0 rgba(255,0,255,.55); }
+    50% { box-shadow: 4px 4px 0 0 var(--ink), 0 0 0 14px rgba(255,0,255,0); }
+  }
+
+  /* ---- Modal ---- */
+  .modal-backdrop {
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px);
+  }
+  .modal-panel {
+    border: 3px solid var(--ink);
+    box-shadow: 10px 10px 0 0 var(--ink);
+    border-radius: 32px 26px 36px 22px / 26px 36px 22px 32px;
+  }
+  .modal-enter { animation: modalIn .32s cubic-bezier(.2,.9,.3,1.2) both; }
+  @keyframes modalIn {
+    from { transform: translateY(40px) scale(.96); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* ---- Loading dots ---- */
+  .dot { animation: dotBounce 1.2s infinite ease-in-out; }
+  .dot:nth-child(2) { animation-delay: .15s; }
+  .dot:nth-child(3) { animation-delay: .3s; }
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: scale(.6); opacity: .4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ---- Skeleton shimmer ---- */
+  .shimmer {
+    background: linear-gradient(90deg, #eee 25%, #f7f7f7 50%, #eee 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ---- Card hover ---- */
+  .card-hover {
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .card-hover:hover {
+    transform: translate(-3px, -3px) rotate(-.4deg);
+    box-shadow: 9px 9px 0 0 var(--ink);
+  }
+
+  /* ---- Wavy shapes ---- */
+  .wave-shape {
+    border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+  }
+
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: #1E7FD1; }
+  ::-webkit-scrollbar-thumb { background: #FFEA00; border: 2px solid #000; border-radius: 8px; }
+
+  /* ---- Tag colors ---- */
+  .tag-shoot { background: #FFEA00; color: #000; }
+  .tag-fest  { background: #C8B6FF; color: #000; }
+  .tag-monet { background: #FF00FF; color: #fff; }
+  .tag-system{ background: #B8F2E6; color: #000; }
+  .tag-char  { background: #FFB5A7; color: #000; }
+  .tag-world { background: #FFD166; color: #000; }
+  .tag-big   { background: #FF85A2; color: #fff; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ============ Background lightning ============ -->
+<div class="lightning-bg" aria-hidden="true">
+  <svg class="bolt" style="top:8%;left:4%;width:60px" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+  <svg class="bolt" style="top:22%;right:7%;width:44px;animation-delay:.6s" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+  <svg class="bolt" style="top:48%;left:2%;width:34px;animation-delay:1.1s" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+  <svg class="bolt" style="top:65%;right:3%;width:52px;animation-delay:.3s" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+  <svg class="bolt" style="top:82%;left:10%;width:40px;animation-delay:1.6s" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+  <svg class="bolt" style="top:35%;right:18%;width:28px;animation-delay:.9s" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+</div>
+
+<div class="relative z-10">
+
+<!-- ============ Header ============ -->
+<header class="pt-8 pb-4 px-4 md:px-8">
+  <div class="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-3">
+      <!-- Logo badge -->
+      <div class="w-14 h-14 bg-spark-yellow sticker flex items-center justify-center">
+        <svg viewBox="0 0 24 24" class="w-8 h-8" fill="#000"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      </div>
+      <div>
+        <h1 class="font-display text-4xl md:text-5xl text-spark-yellow text-outline leading-none tracking-tight">G-SPARK</h1>
+        <p class="text-white text-lg md:text-xl font-black mt-1 tracking-wider">游戏竞品设计 · 每日小报</p>
+      </div>
+    </div>
+    <!-- Date / status chip -->
+    <div class="flex items-center gap-2">
+      <span class="sticker-tag bg-white px-3 py-1.5 text-xs font-black">2026.10.26 · 周一</span>
+      <span class="sticker-tag bg-spark-magenta text-white px-3 py-1.5 text-xs font-black">6 条新情报</span>
+    </div>
+  </div>
+  <!-- sub nav -->
+  <nav id="filterNav" class="max-w-5xl mx-auto mt-5 flex gap-2 overflow-x-auto pb-1">
+    <button data-filter="全部" class="filter-btn sticker-btn bg-spark-yellow px-4 py-2 text-sm font-black whitespace-nowrap">全部</button>
+    <button data-filter="射击类" class="filter-btn sticker-btn bg-white px-4 py-2 text-sm font-black whitespace-nowrap">射击类</button>
+    <button data-filter="开放世界" class="filter-btn sticker-btn bg-white px-4 py-2 text-sm font-black whitespace-nowrap">开放世界</button>
+    <button data-filter="MOBA" class="filter-btn sticker-btn bg-white px-4 py-2 text-sm font-black whitespace-nowrap">MOBA</button>
+    <button data-filter="商业化" class="filter-btn sticker-btn bg-white px-4 py-2 text-sm font-black whitespace-nowrap">商业化</button>
+    <button data-filter="角色机制" class="filter-btn sticker-btn bg-white px-4 py-2 text-sm font-black whitespace-nowrap">角色机制</button>
+  </nav>
+</header>
+
+<!-- ============ Feed ============ -->
+<main class="px-4 md:px-8 py-6">
+  <div id="feed" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch"></div>
+  <!-- Empty state -->
+  <div id="emptyState" class="hidden max-w-5xl mx-auto">
+    <div class="sticker bg-white px-6 py-12 text-center">
+      <div class="w-16 h-16 bg-spark-yellow sticker mx-auto flex items-center justify-center mb-4">
+        <svg viewBox="0 0 24 24" class="w-9 h-9" fill="#000"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </div>
+      <p class="font-black text-base md:text-lg">今天没有该标签相关内容哦，换个标签试试吧～</p>
+    </div>
+  </div>
+</main>
+
+<footer class="text-center text-white/80 text-xs py-8 font-bold tracking-wider">
+  G-SPARK © 2026 · 纯官方白名单 · AI 刺穿公关话术
+</footer>
+</div>
+
+<!-- ============ Spark Modal ============ -->
+<div id="modal" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center modal-backdrop p-0 md:p-6">
+  <div class="modal-panel modal-enter bg-white w-full md:max-w-lg max-h-[92vh] overflow-y-auto" id="modalPanel">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white border-b-3 border-black p-4 flex items-center justify-between" style="border-bottom:3px solid #000">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 bg-spark-magenta sticker-tag flex items-center justify-center">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+        </span>
+        <h3 class="font-display text-xl text-spark-magenta text-outline-sm">SPARK 分析</h3>
+      </div>
+      <button id="closeModal" class="w-9 h-9 bg-spark-yellow sticker-btn flex items-center justify-center">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#000"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div id="modalBody" class="p-5">
+      <!-- injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================ MOCK DATA ============================ */
+const FEED = [
+  {
+    id: 1,
+    game: '原神 Genshin Impact',
+    title: '4.5 版本「铓锋锦间裁」更新详情：新角色千织登场、秘源机兵活动开启',
+    summary: 'HoYoverse 官方公告 4.5 版本上线，新增五星岩系角色千织（裁缝）、蒙德限时活动「秘源机兵」，并实装角色卡池复刻与活动祈愿武器「有乐御免」。',
+    image: 'images/genshin.jpg',
+    pos: '62% center',
+    tags: [{t:'开放世界', c:'tag-world'},{t:'商业化', c:'tag-monet'},{t:'角色机制', c:'tag-char'}],
+    source: 'https://genshin.hoyoverse.com/m/en/news/detail/122817',
+    spark: {
+      summary: '4.5 版本主打新岩系角色千织+卡池复刻，付费节点集中在角色与武器双池。',
+      category: '商业化活动',
+      questions: [
+        { q:'千织与现有岩系角色（钟离/阿贝多）的定位差异？', a:'官方公告未提供往期岩系辅助的横向数值对比，无法进行精确的数值对比分析。但 Spark 基于机制预测：千织作为岩系脱手副 C/辅助，其「裁缝人偶」召唤物与钟离的护盾、阿贝多的后台 E 伤害形成差异化——千织更偏向通过召唤物提供持续岩伤与攻速增益，不直接承担生存位，因此不会替代钟离的盾辅刚需，而是填补「岩系后台增益」这一空白位。'},
+        { q:'武器池「有乐御免」对大小 R 的抽取吸引力评估？', a:'需要结合版本上线后的实际数据观测，建议跟踪首周武器池流水与抽取率后再下结论。但 Spark 根据数据预测：千织专武「有乐御免」的副属性与被动若高度绑定召唤物伤害，将对中 R 玩家形成强抽取动机；但因同期存在旧角色复刻池，预计武器池流水呈现「前高后低」，首日峰值后 48 小时内回落约 35%。'},
+        { q:'是否存在逼氪旧角色复刻的节奏风险？', a:'需要结合玩家社区情绪与付费 ARPU 的背离信号观测。但 Spark 根据数据预测：4.5 版本将复刻枫丹旧角色，若复刻角色强度已被新角色稀释，可能触发「为新角色铺路而复刻」的逼氪质疑；建议关注复刻池首日流水是否低于同期新角色池 60% 作为风险阈值。'}
+      ]
+    }
+  },
+  {
+    id: 2,
+    game: '无畏契约 Valorant',
+    title: '12.05 版本更新：Lotus A 点调整、新控场特工 Miks 上线、Yoru/Clove/Skye 平衡',
+    summary: 'Riot 官方 12.05 补丁说明：Lotus 地图 A 点攻防 lobby 墙体加厚防穿射、跳点位移调整；新增克罗地亚控场特工 Miks；Yoru、Clove、Skye 获平衡调整，限时模式「淘汰赛」上线。',
+    image: 'images/valorant.jpg',
+    tags: [{t:'射击类', c:'tag-shoot'},{t:'系统玩法', c:'tag-system'},{t:'角色机制', c:'tag-char'}],
+    source: 'https://playvalorant.com/en-us/news/game-updates/valorant-patch-notes-12-05/',
+    spark: {
+      summary: '12.05 以 Lotus A 点结构调整+新控场 Miks 为核心，压缩 Yoru/Clove 单兵强度。',
+      category: '系统玩法',
+      questions: [
+        { q:'Lotus A 点墙体加厚与跳点位移调整对攻防天平的影响？', a:'官方公告未提供调整前后的胜率对比数据，无法进行精确的胜率对比分析。但 Spark 基于地图结构预测：A 点 lobby 墙体加厚后，防守方无法再通过穿射压制进攻方出生推进，进攻方 A 点首波成功率预计上升 8-12%；跳点位移调整降低了进攻方绕后成本，整体 A 点将从「防守方优势」转向「攻防均势」。'},
+        { q:'新控场特工 Miks 是否会打破现有控场位的出场格局？', a:'需要结合上线后首周各段位 Miks 出场率与胜率观测。但 Spark 根据数据预测：Miks 作为新控场，其技能组若具备区域分割+信息获取双重能力，将在高分段迅速替代 Omen 的部分出场；但因 Viper 的毒幕控图不可替代，Miks 更可能挤压 Astra 的出场空间，而非直接撼动 Viper。'},
+        { q:'Yoru/Clove/Skye 的平衡调整对天梯生态的连锁影响？', a:'需要结合版本上线后的实际数据观测，建议跟踪首周 KPI 后再下结论。但 Spark 根据数据预测：Yoru 与 Clove 被削弱后，中低分段的「单兵 carry」型玩家体验下降，预计带动团队配合型阵容（如双烟双闪）的出场率上升约 15%；Skye 的调整方向若为增强信息能力，可能使其重回辅助位 T1 梯队。'}
+      ]
+    }
+  },
+  {
+    id: 3,
+    game: '英雄联盟 LoL',
+    title: '14.14 版本新英雄「奥萝拉 Aurora」登场：穿梭两界的弗瑞尔卓德瓦斯塔亚法师刺客',
+    summary: 'Riot 公布第 166 位英雄「两界女巫 奥萝拉」，定位法师/刺客，核心机制为通过灵体标记敌人后触发多段突进与斩杀，被动可从被命中敌人身上汲取灵体获得治疗与移速加成。',
+    image: 'images/aurora.jpg',
+    tags: [{t:'MOBA', c:'tag-shoot'},{t:'角色机制', c:'tag-char'}],
+    source: 'https://www.leagueoflegends.com/en-us/news/game-updates/patch-14-14-notes/',
+    spark: {
+      summary: '新英雄奥萝拉以灵体标记多段位移为核心，操作上限高，偏中路法师刺客。',
+      category: '角色机制',
+      questions: [
+        { q:'多段位移机制是否会打破中路刺客的平衡生态？', a:'需要结合版本上线后的实际数据观测，建议跟踪首周 KPI 后再下结论。但 Spark 根据数据预测：奥萝拉的多段位移若冷却依赖灵体层数而非固定 CD，将比阿卡丽更难被反制；预计上线首周中路非 BAN 即选，胜率可能突破 53%，触发紧急热修概率约 60%。'},
+        { q:'与同类刺客（阿卡丽/卡特琳娜）的机制差异点在哪？', a:'官方公告未提供与阿卡丽/卡特的数值对比，无法进行精确的数值对比分析。但 Spark 基于机制预测：阿卡丽依赖能量与隐身，卡特依赖击杀刷新，而奥萝拉依赖灵体标记层数——这意味着奥萝拉的爆发窗口更依赖「命中→叠层→突进」的连招节奏，容错率低于卡特但上限高于阿卡丽，属于典型的高操作高回报设计。'},
+        { q:'预计对职业赛场 BP 优先级的影响？', a:'需要结合职业赛场首个比赛周的 BP 数据观测。但 Spark 根据数据预测：奥萝拉在职业赛场将以「中路摇摆+打野摇摆」的高优先级身份出现，BAN 率预计进入前 5；其多段位移对后排的威胁将迫使下路组合选择带位移或强自保的 ADC，间接影响 ADC 位的英雄池选择。'}
+      ]
+    }
+  },
+  {
+    id: 4,
+    game: '堡垒之夜 Fortnite',
+    title: '2024 Fortnitemares 万圣节活动（v31.40）：爆炸比利、电锯、锄魔行动回归',
+    summary: 'Epic 官方公告 Fortnitemares 2024 上线：新增可投掷爆炸比利（电锯惊魂联动）、可拾取电锯武器、锄魔行动 PvE 模式回归，商城上线迪士尼反派、剪刀手爱德华、人皮脸等限定联动皮肤。',
+    image: 'images/fortnite.jpg',
+    pos: '50% center',
+    tags: [{t:'射击类', c:'tag-shoot'},{t:'节日节点', c:'tag-fest'},{t:'商业化', c:'tag-monet'}],
+    source: 'https://www.fortnite.com/news/fortnitemares-2024-afflicts-the-island-in-battle-royale-v31-40',
+    spark: {
+      summary: '万圣节节点以电锯惊魂联动+PvE 回归+多 IP 限定皮肤组合拳拉动活跃与付费。',
+      category: '综合大版本',
+      questions: [
+        { q:'爆炸比利与电锯等限时道具的留存钩子设计是否有效？', a:'需要结合活动期间 DAU 与道具使用率数据观测。但 Spark 根据数据预测：爆炸比利的「追猎爆炸」机制具备强社交传播属性（被追玩家的反应可二次传播），预计带动活动期 DAU 峰值高于常规周末 20-25%；但因道具为限时，活动结束后留存需依赖皮肤与任务奖励承接。'},
+        { q:'锄魔行动 PvE 模式的重复可玩性与回流用户承接？', a:'需要结合模式首周参与率与重复对局数观测。但 Spark 根据数据预测：锄魔行动作为 PvE 波次模式，单局时长若控制在 8-12 分钟，重复可玩性将高于常规 BR；对回流用户而言，低门槛的 PvE 可作为「回坑缓冲」，预计回流用户次日留存提升约 10%。'},
+        { q:'多 IP 联动皮肤（迪士尼反派/剪刀手爱德华）对核心/泛用户的覆盖度？', a:'需要结合皮肤商城首周销量数据观测。但 Spark 根据数据预测：迪士尼反派（玛琳菲森/虎克船长/库伊拉）覆盖泛娱乐女性用户，剪刀手爱德华与皮脸覆盖恐怖电影圈层，形成「广度+深度」的 IP 矩阵；预计联动皮肤销售额占活动期商城总收入 55% 以上，但单款销量最高的仍可能是比利（电锯惊魂）皮肤。'}
+      ]
+    }
+  },
+  {
+    id: 5,
+    game: '崩坏：星穹铁道 HSR',
+    title: '2.5 版本「碧羽飞黄」更新：新区域「裂空」、新五星飞霄（巡猎·风）与灵砂（丰饶·火）登场',
+    summary: 'HoYoverse 官方公告 2.5 版本上线，开放全新区域「裂空」（仙舟罗浮军演改造场地），新增五星巡猎风系角色飞霄（通过「飞金」叠层触发追加攻击）与五星丰饶火系角色灵砂（治疗角色）。',
+    image: 'images/hsr.jpg',
+    tags: [{t:'开放世界', c:'tag-world'},{t:'综合大版本', c:'tag-big'},{t:'角色机制', c:'tag-char'}],
+    source: 'https://hsr.hoyoverse.com/en-us/news/125792',
+    spark: {
+      summary: '2.5 版本新增裂空区域+双五星（飞霄巡猎风/灵砂丰饶火），内容量偏角色驱动。',
+      category: '综合大版本',
+      questions: [
+        { q:'飞霄「飞金叠层→追加攻击」机制是否会冲击现有巡猎位环境？', a:'需要结合上线后模拟宇宙与混沌回忆的出场率数据观测。但 Spark 根据数据预测：飞霄的追加攻击机制与同谐主/花火等增伤辅助高度契合，若叠层效率达标，将直接威胁希儿的巡猎主 C 地位；但因飞霄依赖队伍攻击频率叠层，单走能力弱于希儿，定位更偏「队伍核心」而非「单核 carry」。'},
+        { q:'灵砂作为丰饶火奶，与现有丰饶（罗刹/藿藿/玲可）的差异化？', a:'官方公告未提供与现有丰饶角色的数值对比，无法进行精确的数值对比分析。但 Spark 基于机制预测：灵砂若为火系丰饶，将填补「火属性治疗」空白，与刃（风/毁灭）等需要特定属性配合的角色形成绑定；其治疗机制若附带攻击增益，可能在泛用性上超越玲可，但难以撼动罗刹的即时解控+持续治疗地位。'},
+        { q:'新区域「裂空」的叙事节奏是否能承接长期玩家的探索疲劳？', a:'需要结合新区域探索完成率与玩家留存数据观测。但 Spark 根据数据预测：裂空作为军演改造场地，场景密度预计高于匹诺康尼，探索疲劳风险较低；但若以「战斗试炼」为主而非剧情驱动，可能导致剧情向玩家流失，建议关注新区域首日探索完成率是否低于 40%。'}
+      ]
+    }
+  },
+  {
+    id: 6,
+    game: 'Apex Legends',
+    title: '第 23 赛季「From the Rift」更新：命脉重做、Launch Royale 复古模式、裂隙遗物',
+    summary: 'EA 官方公告 S23「From the Rift」上线：命脉 Lifeline 获得重做技能组（战斗滑翔、D.O.C. 传送、护盾力场），新增复古限时模式「Launch Royale」（回归 2019 初代武器与传奇），以及裂隙遗物宇宙能力与新神话近战「猛龙之爪」。',
+    image: 'images/apex_launch.jpg',
+    tags: [{t:'射击类', c:'tag-shoot'},{t:'系统玩法', c:'tag-system'},{t:'角色机制', c:'tag-char'}],
+    source: 'https://forums.ea.com/discussions/apex-legends-general-discussion-en/season-23-from-the-rift-updates--patch-notes/5737011',
+    spark: {
+      summary: 'S23 以命脉重做+复古 LTM+裂隙遗物为核心，主打「回归初心」的情怀营销。',
+      category: '综合大版本',
+      questions: [
+        { q:'命脉重做后从纯辅助转向前线斗士，对支援位生态的冲击？', a:'需要结合上线后命脉的出场率与胜率数据观测。但 Spark 根据数据预测：命脉获得战斗滑翔与护盾力场后，定位从「后方奶妈」转为「前线支援」，预计在高分段出场率从当前约 3% 回升至 8-10%；但因纽卡索与直布罗陀的护盾机制不可替代，命脉更可能挤压万蒂奇/地平线等输出型传奇的出场，而非辅助位内部竞争。'},
+        { q:'Launch Royale 复古模式对老玩家回流的拉动力？', a:'需要结合模式首周参与率与回流用户占比观测。但 Spark 根据数据预测：Launch Royale 回归 2019 初代武器池（无 EVO 护甲、无技能升级）的「纯技能」设定，对 2019-2021 年退坑老玩家具备强情感钩子，预计带动赛季首周回流用户数高于常规赛季 40%；但因模式限时，回流用户的长期留存需依赖命脉重做与裂隙遗物的长线内容承接。'},
+        { q:'裂隙遗物宇宙能力是否会破坏大逃杀的平衡底线？', a:'需要结合上线后高端局遗物使用率与吃鸡率数据观测。但 Spark 根据数据预测：裂隙遗物提供的「宇宙能力」若为局内随机掉落且强度可控，将类似赛季道具的定位，不会破坏核心平衡；但若遗物强度过高且获取确定性强，可能导致「无遗物不打架」的恶性循环，建议关注遗物吃鸡贡献占比是否超过 30% 作为平衡红线。'}
+      ]
+    }
+  }
+];
+
+/* ============================ RENDER FEED ============================ */
+const feedEl = document.getElementById('feed');
+const emptyEl = document.getElementById('emptyState');
+const filterBtns = document.querySelectorAll('.filter-btn');
+let activeFilter = '全部';
+
+function cardHTML(item) {
+  return `
+    <article class="sticker card-hover overflow-hidden flex flex-col h-full" data-id="${item.id}">
+      <!-- cover: unified 16:9 frame, oversized art cropped from focal point -->
+      <div class="relative overflow-hidden">
+        <img src="${item.image}?v=3" alt="${item.game}"
+             class="block w-full aspect-video object-cover"
+             style="object-position:${item.pos || 'center'}" loading="lazy"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="hidden w-full aspect-video bg-spark-cream items-center justify-center">
+          <svg viewBox="0 0 24 24" class="w-12 h-12 text-spark-skyDeep/40" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        </div>
+        <span class="absolute top-3 left-3 sticker-tag bg-white px-3.5 py-2 text-sm font-black">${item.game}</span>
+      </div>
+      <!-- body -->
+      <div class="p-4 flex flex-col flex-1">
+        <!-- tags -->
+        <div class="flex flex-wrap gap-1.5 mb-2.5 h-6 overflow-hidden">
+          ${item.tags.map(tg => `<span class="sticker-tag ${tg.c} px-2.5 py-0.5 text-[11px] font-black">${tg.t}</span>`).join('')}
+        </div>
+        <h2 class="font-black text-base md:text-lg leading-snug mb-2 line-clamp-2 min-h-[3.5rem]">${item.title}</h2>
+        <p class="text-sm text-neutral-600 leading-relaxed flex-1 line-clamp-3">${item.summary}</p>
+        <!-- actions -->
+        <div class="flex items-center justify-between mt-4 pt-3 border-t-2 border-black/10">
+          <a href="${item.source}" target="_blank" rel="noopener" class="text-sm font-bold text-spark-skyDeep hover:underline inline-flex items-center gap-1">
+            查看原文
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z"/></svg>
+          </a>
+          <button class="spark-btn sticker-btn bg-spark-magenta text-white px-4 py-2 text-sm font-black spark-pulse inline-flex items-center gap-1.5" data-id="${item.id}">
+            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+            Spark 分析
+          </button>
+        </div>
+      </div>
+    </article>`;
+}
+
+function bindSparkButtons() {
+  document.querySelectorAll('.spark-btn').forEach(btn => {
+    btn.addEventListener('click', () => openSpark(parseInt(btn.dataset.id)));
+  });
+}
+
+function renderFeed(filter = '全部') {
+  activeFilter = filter;
+  const list = filter === '全部'
+    ? FEED
+    : FEED.filter(item => item.tags.some(tg => tg.t === filter));
+
+  if (list.length === 0) {
+    feedEl.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    emptyEl.classList.add('block');
+  } else {
+    emptyEl.classList.add('hidden');
+    emptyEl.classList.remove('block');
+    feedEl.innerHTML = list.map(cardHTML).join('');
+    bindSparkButtons();
+  }
+}
+
+/* ---- Tag filter wiring ---- */
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter;
+    // active button -> yellow, others -> white
+    filterBtns.forEach(b => {
+      b.classList.remove('bg-spark-yellow');
+      b.classList.add('bg-white');
+    });
+    btn.classList.add('bg-spark-yellow');
+    btn.classList.remove('bg-white');
+    renderFeed(f);
+    window.scrollTo({ top: document.getElementById('filterNav').offsetTop - 10, behavior: 'smooth' });
+  });
+});
+
+/* ============================ SPARK MODAL ============================ */
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modalBody');
+const closeBtn = document.getElementById('closeModal');
+
+function openSpark(id) {
+  const item = FEED.find(f => f.id === id);
+  if (!item) return;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  modalBody.innerHTML = `
+    <div class="flex items-center gap-2 mb-3">
+      <span class="sticker-tag bg-spark-yellow px-2.5 py-0.5 text-[11px] font-black">${item.game}</span>
+    </div>
+    <h4 class="font-black text-base leading-snug mb-4">${item.title}</h4>
+
+    <!-- Loading state -->
+    <div id="loadingState" class="space-y-4">
+      <div class="flex items-center gap-3 text-sm font-bold text-neutral-600">
+        <div class="flex gap-1">
+          <span class="dot w-2.5 h-2.5 rounded-full bg-spark-magenta inline-block"></span>
+          <span class="dot w-2.5 h-2.5 rounded-full bg-spark-magenta inline-block"></span>
+          <span class="dot w-2.5 h-2.5 rounded-full bg-spark-magenta inline-block"></span>
+        </div>
+        Spark 脑机接口连接中…正在刺穿公关话术
+      </div>
+      <div class="space-y-2">
+        <div class="shimmer h-4 rounded-full w-full"></div>
+        <div class="shimmer h-4 rounded-full w-4/5"></div>
+        <div class="shimmer h-10 rounded-2xl w-1/3 mt-3"></div>
+      </div>
+    </div>
+
+    <!-- Result (hidden initially) -->
+    <div id="resultState" class="hidden space-y-4"></div>
+  `;
+
+  // Simulate AI call — randomly timeout for demo
+  const willTimeout = Math.random() < 0.18;
+  const delay = willTimeout ? 11000 : 1200 + Math.random()*800;
+
+  const timer = setTimeout(() => {
+    if (willTimeout) {
+      showTimeout(item);
+    } else {
+      showResult(item);
+    }
+  }, delay);
+
+  // allow close to abort
+  modal._timer = timer;
+}
+
+function showResult(item) {
+  const s = item.spark;
+  const resultEl = document.getElementById('resultState');
+  document.getElementById('loadingState').classList.add('hidden');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = `
+    <!-- category -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-black text-neutral-500">智能分类</span>
+      <span class="sticker-tag bg-spark-lavender px-3 py-1 text-xs font-black">${s.category}</span>
+    </div>
+    <!-- summary -->
+    <div>
+      <div class="text-xs font-black text-neutral-500 mb-1.5">AI 摘要</div>
+      <div class="sticker-alt bg-spark-cream p-3.5">
+        <p class="font-bold text-sm leading-relaxed">${s.summary}</p>
+      </div>
+    </div>
+    <!-- recommended questions -->
+    <div>
+      <div class="text-xs font-black text-neutral-500 mb-2">推荐深度问题</div>
+      <div class="space-y-2">
+        ${s.questions.map((qq, i) => `
+          <button class="q-btn sticker-btn bg-white w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-spark-yellow transition-colors" data-q="${i}">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-spark-magenta text-white text-xs font-black mr-2">${i+1}</span>
+            ${qq.q}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+    <p class="text-[11px] text-neutral-400 font-bold text-center pt-2">Powered by G-Spark Agent · JSON Mode · 已启用防幻觉约束</p>
+  `;
+  resultEl.querySelectorAll('.q-btn').forEach(b => {
+    b.addEventListener('click', () => handleQuestion(b, item));
+  });
+}
+
+function showTimeout(item) {
+  document.getElementById('loadingState').classList.add('hidden');
+  const resultEl = document.getElementById('resultState');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = `
+    <div class="text-center py-6">
+      <div class="w-16 h-16 bg-spark-yellow sticker mx-auto flex items-center justify-center mb-4">
+        <svg viewBox="0 0 24 24" class="w-9 h-9" fill="#000"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <h4 class="font-black text-lg mb-1">Spark 脑机接口拥堵</h4>
+      <p class="text-sm text-neutral-500 font-bold mb-5">大模型接口响应超时，请重试。</p>
+      <button class="retry-btn sticker-btn bg-spark-magenta text-white px-6 py-2.5 text-sm font-black inline-flex items-center gap-2">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        重新触发
+      </button>
+    </div>
+  `;
+  resultEl.querySelector('.retry-btn').addEventListener('click', () => openSpark(item.id));
+}
+
+function handleQuestion(btn, item) {
+  // Use the pre-generated Agent answer stored in the question object
+  const qIdx = parseInt(btn.dataset.q);
+  const answer = item.spark.questions[qIdx]?.a || '暂无分析数据。';
+  btn.classList.add('bg-spark-yellow');
+  // toggle answer inline
+  let ans = btn.nextElementSibling;
+  if (ans && ans.classList.contains('answer-block')) { ans.remove(); btn.classList.remove('bg-spark-yellow'); return; }
+  ans = document.createElement('div');
+  ans.className = 'answer-block sticker-alt bg-spark-mint p-3.5 mt-1 text-sm font-bold leading-relaxed';
+  // Split answer into caveat + prediction paragraphs at the "但 Spark" boundary
+  const parts = answer.split(/(?=但\s*Spark)/);
+  const caveat = parts[0].trim();
+  // strip the lead-in connector ("但 Spark 根据数据预测：") since the callout carries the label
+  const prediction = parts[1] ? parts[1].replace(/^但\s*Spark\s*[^：:]{0,12}[：:]\s*/, '').trim() : '';
+  ans.innerHTML = `
+    <div class="flex items-center gap-1.5 text-[11px] text-neutral-500 font-black mb-1.5">
+      <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="#FF00FF"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      AGENT 回复
+    </div>
+    <p class="text-neutral-700">${caveat}</p>
+    ${prediction ? `
+    <div class="mt-2.5 border-l-4 border-spark-magenta bg-spark-yellow/40 rounded-r-xl px-3 py-2">
+      <div class="text-[11px] font-black text-spark-magenta tracking-wide mb-1">SPARK 数据预测</div>
+      <p class="text-spark-skyDeep">${prediction}</p>
+    </div>` : ''}
+  `;
+  btn.insertAdjacentElement('afterend', ans);
+  ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ============================ MODAL CONTROLS ============================ */
+function closeModal() {
+  if (modal._timer) clearTimeout(modal._timer);
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+closeBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+/* ============================ INIT ============================ */
+renderFeed();
+</script>
+</body>
+</html>
